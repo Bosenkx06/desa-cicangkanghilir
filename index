@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desa Cicangkanghilir - Portal Layanan & Profil Digital</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS (xlsx) untuk Ekspor Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF & AutoTable untuk Ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-header { background: rgba(20, 83, 45, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Topbar / Kontak Cepat -->
+    <div class="bg-navy-900 text-slate-300 text-xs py-2 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-4 flex-wrap">
+                <span><i class="fas fa-map-marker-alt text-brand-500 mr-1"></i> Jl. Cijambe No. 5, Cicangkanghilir, Cipongkor, KBB</span>
+                <a href="mailto:cicangkanghilir.desa@gmail.com" class="hover:text-white transition"><i class="fas fa-envelope text-brand-500 mr-1"></i> cicangkanghilir.desa@gmail.com</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-semibold text-white">Layanan WhatsApp:</span>
+                <a href="https://wa.me/6283805319924" target="_blank" class="hover:text-brand-400 transition"><i class="fab fa-whatsapp text-emerald-400"></i> +62 838-0531-9924 (Rayiman)</a>
+                <span class="text-slate-600">|</span>
+                <a href="https://wa.me/6283822134343" target="_blank" class="hover:text-brand-400 transition"><i class="fab fa-whatsapp text-emerald-400"></i> +62 838-2213-4343 (Kusaeri)</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="glass-header text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('beranda')">
+                <div class="w-10 h-10 rounded-full bg-white text-brand-800 flex items-center justify-center font-bold text-xl shadow">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-wide leading-tight">DESA CICANGKANGHILIR</h1>
+                    <p class="text-xs text-brand-200">Kec. Cipongkor, Kab. Bandung Barat</p>
+                </div>
+            </div>
+
+            <!-- Desktop Menu -->
+            <nav class="hidden lg:flex items-center gap-1 font-medium text-sm">
+                <button onclick="switchTab('beranda')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition active-tab" data-target="beranda">Beranda</button>
+                <button onclick="switchTab('profil')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition" data-target="profil">Profil Desa</button>
+                <button onclick="switchTab('kependudukan')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition" data-target="kependudukan">Kependudukan</button>
+                <button onclick="switchTab('lingkungan')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition" data-target="lingkungan">Lingkungan Sosial</button>
+                <button onclick="switchTab('data-rw')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition" data-target="data-rw">Data RW & RT</button>
+                <button onclick="switchTab('dashboard')" class="nav-btn px-3 py-2 rounded-lg hover:bg-brand-700 transition" data-target="dashboard">Dashboard Admin</button>
+            </nav>
+
+            <!-- User Auth / Profile Area -->
+            <div class="flex items-center gap-2" id="auth-area">
+                <button onclick="openModal('login-modal')" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow"><i class="fas fa-sign-in-alt mr-1"></i> Masuk / Daftar</button>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button onclick="toggleMobileMenu()" class="lg:hidden text-white text-xl p-2 focus:outline-none">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-brand-900 border-t border-brand-700 px-4 py-3 flex flex-col gap-2">
+            <button onclick="switchTab('beranda'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Beranda</button>
+            <button onclick="switchTab('profil'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Profil Desa</button>
+            <button onclick="switchTab('kependudukan'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Kependudukan</button>
+            <button onclick="switchTab('lingkungan'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Lingkungan Sosial</button>
+            <button onclick="switchTab('data-rw'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Data RW & RT</button>
+            <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="text-left px-3 py-2 rounded hover:bg-brand-800">Dashboard Admin</button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow">
+
+        <!-- ==================== TAB: BERANDA ==================== -->
+        <section id="tab-beranda" class="tab-content">
+            <!-- Hero Banner -->
+            <div class="relative bg-navy-900 text-white py-24 px-4 overflow-hidden shadow-xl">
+                <div class="absolute inset-0 opacity-40 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1600');"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-navy-900 via-brand-900/80 to-transparent"></div>
+                <div class="relative max-w-7xl mx-auto flex flex-col items-start gap-4">
+                    <span class="bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow">Website Resmi Desa</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight max-w-2xl">Selamat Datang di Portal Digital Desa Cicangkanghilir</h1>
+                    <p class="text-slate-200 max-w-xl text-base md:text-lg">Kecamatan Cipongkor, Kabupaten Bandung Barat, Jawa Barat. Transparan, Cepat, dan Melayani Sepenuh Hati.</p>
+                    <div class="flex flex-wrap gap-3 mt-4">
+                        <button onclick="switchTab('lingkungan')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2"><i class="fas fa-bullhorn"></i> Laporkan Masalah / Kegiatan</button>
+                        <a href="https://maps.app.goo.gl/JmgxrkzWKoFWqp1BA" target="_blank" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur font-bold px-6 py-3 rounded-xl transition flex items-center gap-2"><i class="fas fa-map-marked-alt text-brand-400"></i> Lokasi Kantor Desa</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik Cepat Baranda -->
+            <div class="max-w-7xl mx-auto px-4 -mt-10 relative z-20 mb-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-brand-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-users"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold uppercase">Total Warga</p>
+                            <h3 class="text-2xl font-extrabold text-slate-800" id="stat-total-warga">8,450</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-blue-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-file-alt"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold uppercase">Laporan Masuk</p>
+                            <h3 class="text-2xl font-extrabold text-slate-800" id="stat-total-laporan">142</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-amber-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-baby"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold uppercase">Kelahiran Bulan Ini</p>
+                            <h3 class="text-2xl font-extrabold text-slate-800" id="stat-total-lahir">12</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-emerald-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-bold"><i class="fas fa-hands-helping"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-500 font-semibold uppercase">Kegiatan Sosial</p>
+                            <h3 class="text-2xl font-extrabold text-slate-800" id="stat-total-kegiatan">38</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sambutan & Pengumuman -->
+            <div class="max-w-7xl mx-auto px-4 mb-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Sambutan Kepala Desa -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-md border border-slate-100 flex flex-col items-center text-center">
+                    <div class="w-32 h-32 rounded-full overflow-hidden shadow-lg mb-4 border-4 border-brand-500">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400" alt="Kepala Desa" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-900">Ajid Jaenudin, S.IP.</h3>
+                    <p class="text-xs font-semibold text-brand-600 mb-3">Kepala Desa Cicangkanghilir</p>
+                    <p class="text-sm text-slate-600 italic mb-4">"Selamat datang di portal informasi resmi desa kami. Semoga pelayanan publik semakin transparan, cepat, dan warga semakin sejahtera."</p>
+                    <div class="w-full pt-4 border-t border-slate-100 text-left">
+                        <h4 class="font-bold text-xs uppercase text-slate-400 mb-2">Perangkat Terkait:</h4>
+                        <p class="text-xs text-slate-700"><strong>Kepala Dusun:</strong> Rayiman Nurhikmat</p>
+                        <p class="text-xs text-slate-700"><strong>Sekretariat:</strong> M. Kusaeri</p>
+                    </div>
+                </div>
+
+                <!-- Pengumuman Resmi & Feed Laporan Publik -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Pengumuman Penting -->
+                    <div class="bg-gradient-to-r from-brand-800 to-brand-900 text-white p-6 rounded-2xl shadow-md">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-bullhorn text-amber-400"></i> Pengumuman Resmi Desa</h3>
+                            <span class="bg-amber-400 text-navy-900 text-xs font-bold px-2.5 py-1 rounded-full">Terbaru</span>
+                        </div>
+                        <div id="beranda-pengumuman-list" class="space-y-3">
+                            <div class="bg-white/10 p-4 rounded-xl backdrop-blur border border-white/10">
+                                <span class="text-xs text-amber-300 font-semibold">28 Oktober 2026</span>
+                                <h4 class="font-bold text-base mt-1">Jadwal Pelayanan Pembuatan KTP & UHC BPJS Keliling</h4>
+                                <p class="text-xs text-slate-200 mt-1">Kepada seluruh warga Desa Cicangkanghilir, pelayanan jemput bola administrasi kependudukan akan hadir di tiap kantor RW mulai minggu depan.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Laporan Lingkungan Sosial Terbaru (Publik) -->
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-slate-900 flex items-center gap-2"><i class="fas fa-clipboard-list text-brand-600"></i> Laporan & Kegiatan Warga Terbaru</h3>
+                            <button onclick="switchTab('lingkungan')" class="text-xs font-bold text-brand-600 hover:underline">Lihat Semua →</button>
+                        </div>
+                        <div id="beranda-laporan-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Diisi via Javascript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buku Tamu & Catatan Warga (Public Wall) -->
+            <div class="bg-slate-100 py-12 px-4 border-t border-slate-200">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-extrabold text-slate-900">Buku Tamu & Catatan Warga untuk Desa</h2>
+                        <p class="text-sm text-slate-600 mt-1">Sampaikan pesan, masukan, atau aspirasi Anda untuk kemajuan Desa Cicangkanghilir.</p>
+                    </div>
+
+                    <!-- Form Input Catatan (Hanya jika Login) -->
+                    <div id="guestbook-form-container" class="bg-white p-6 rounded-2xl shadow-md mb-8 hidden">
+                        <h3 class="font-bold text-base mb-3 text-brand-800"><i class="fas fa-pen-nib mr-1"></i> Tulis Pesan / Catatan Baru</h3>
+                        <form id="form-guestbook" onsubmit="handleGuestbookSubmit(event)">
+                            <div class="mb-3">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Pesan / Masukan</label>
+                                <textarea id="gb-message" rows="3" required class="w-full p-3 border rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none" placeholder="Tuliskan masukan atau catatan konstruktif untuk pemerintah desa..."></textarea>
+                            </div>
+                            <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow transition">Kirim Catatan</button>
+                        </form>
+                    </div>
+                    <div id="guestbook-login-prompt" class="bg-brand-50 border border-brand-200 p-4 rounded-xl text-center mb-8 text-sm text-brand-900">
+                        <i class="fas fa-info-circle mr-1"></i> Silakan <button onclick="openModal('login-modal')" class="font-bold underline text-brand-700">Masuk / Daftar</button> terlebih dahulu untuk menulis catatan atau masukan di buku tamu desa.
+                    </div>
+
+                    <!-- List Catatan Warga -->
+                    <div id="guestbook-list" class="space-y-4">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: PROFIL DESA ==================== -->
+        <section id="tab-profil" class="tab-content hidden py-10 px-4">
+            <div class="max-w-7xl mx-auto space-y-10">
+                <div class="text-center max-w-2xl mx-auto">
+                    <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100 px-3 py-1 rounded-full">Profil Digital</span>
+                    <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Tentang Desa Cicangkanghilir</h2>
+                    <p class="text-sm text-slate-600 mt-1">Kecamatan Cipongkor, Kabupaten Bandung Barat, Provinsi Jawa Barat.</p>
+                </div>
+
+                <!-- Visi Misi & Sejarah -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                        <h3 class="text-lg font-bold text-brand-800 mb-3 flex items-center gap-2"><i class="fas fa-bullseye"></i> Visi & Misi Desa</h3>
+                        <p class="font-semibold text-sm text-slate-800 mb-2">Visi:</p>
+                        <p class="text-sm text-slate-600 italic bg-slate-50 p-3 rounded-xl border mb-4" id="view-visi">"Terwujudnya Desa Cicangkanghilir yang Maju, Religius, Sejahtera, dan Berbasis Teknologi Pelayanan Digital."</p>
+                        <p class="font-semibold text-sm text-slate-800 mb-2">Misi:</p>
+                        <ul class="text-sm text-slate-600 list-disc list-inside space-y-1">
+                            <li>Meningkatkan kualitas tata kelola pemerintahan desa yang transparan dan akuntabel.</li>
+                            <li>Mengembangkan pelayanan publik berbasis web dan digitalisasi administrasi.</li>
+                            <li>Memperkuat ekonomi kerakyatan melalui Koperasi dan UMKM lokal.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                        <h3 class="text-lg font-bold text-brand-800 mb-3 flex items-center gap-2"><i class="fas fa-history"></i> Sejarah Singkat Desa</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Desa Cicangkanghilir merupakan salah satu desa agraris dan berkembang di Kecamatan Cipongkor, Kabupaten Bandung Barat. Dikenal dengan keramahan warganya, panorama alam perbukitan yang asri, serta letaknya yang strategis di dekat kawasan PLTA Saguling. Seiring perkembangan zaman, Desa Cicangkanghilir terus berinovasi mengintegrasikan layanan administrasi warga secara digital.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Struktur Organisasi & Perangkat -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 text-center"><i class="fas fa-sitemap text-brand-600 mr-2"></i> Struktur Organisasi Pemerintahan Desa</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 shadow">
+                            <h4 class="font-bold text-base text-slate-900">Ajid Jaenudin, S.IP.</h4>
+                            <p class="text-xs text-brand-600 font-semibold">Kepala Desa</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 shadow">
+                            <h4 class="font-bold text-base text-slate-900">M. Kusaeri</h4>
+                            <p class="text-xs text-brand-600 font-semibold">Sekretaris Desa</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 shadow">
+                            <h4 class="font-bold text-base text-slate-900">Rayiman Nurhikmat</h4>
+                            <p class="text-xs text-brand-600 font-semibold">Kepala Dusun / Kaur</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=300" class="w-24 h-24 rounded-full mx-auto object-cover mb-3 shadow">
+                            <h4 class="font-bold text-base text-slate-900">Staf Administrasi</h4>
+                            <p class="text-xs text-brand-600 font-semibold">Pelayanan Umum</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Demografi Warga -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 text-center"><i class="fas fa-chart-pie text-brand-600 mr-2"></i> Grafik Statistik Demografi Warga</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-sm font-bold text-center text-slate-700 mb-3">Distribusi Kelompok Usia Warga</h4>
+                            <div class="h-64 flex justify-center"><canvas id="chartAge"></canvas></div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-center text-slate-700 mb-3">Tingkat Pendidikan Terakhir</h4>
+                            <div class="h-64 flex justify-center"><canvas id="chartEdu"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: KEPENDUDUKAN (PRIVAT) ==================== -->
+        <section id="tab-kependudukan" class="tab-content hidden py-10 px-4">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-amber-600 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full"><i class="fas fa-lock mr-1"></i> Layanan Privat Warga</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Pelaporan Kependudukan</h2>
+                        <p class="text-sm text-slate-600 mt-1">Layanan khusus warga terdaftar untuk pengajuan Kelahiran, Kematian, dan Pindah Datang.</p>
+                    </div>
+                    <div id="kependudukan-action-btn">
+                        <!-- Tombol Buka Form -->
+                    </div>
+                </div>
+
+                <!-- Warning Jika Belum Login -->
+                <div id="kependudukan-lock-alert" class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-2xl shadow-md text-center">
+                    <i class="fas fa-lock text-3xl text-amber-500 mb-2"></i>
+                    <h3 class="font-bold text-lg text-amber-900">Akses Terbatas (Privat)</h3>
+                    <p class="text-sm text-amber-700 max-w-md mx-auto mt-1 mb-4">Fitur formulir pelaporan kependudukan (Kelahiran, Kematian, Pindah Datang) hanya dapat diakses oleh warga yang sudah masuk/login.</p>
+                    <button onclick="openModal('login-modal')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-xl shadow transition">Masuk / Daftar Sekarang</button>
+                </div>
+
+                <!-- Konten Kependudukan (Tampil Jika Login) -->
+                <div id="kependudukan-content" class="hidden space-y-8">
+                    <!-- Sub-tabs Kependudukan -->
+                    <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+                        <button onclick="switchKepSub('lahir')" class="kep-sub-btn px-4 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white shadow">Laporan Kelahiran</button>
+                        <button onclick="switchKepSub('mati')" class="kep-sub-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300">Laporan Kematian</button>
+                        <button onclick="switchKepSub('pindah')" class="kep-sub-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300">Laporan Pindah Datang</button>
+                    </div>
+
+                    <!-- 1. Form & Tabel Kelahiran -->
+                    <div id="kep-sub-lahir" class="kep-sub-pane space-y-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-md border">
+                            <h3 class="font-bold text-lg text-slate-900 mb-4"><i class="fas fa-baby text-brand-600 mr-2"></i> Form Pengajuan Laporan Kelahiran</h3>
+                            <form id="form-lahir" onsubmit="handleKependudukanSubmit(event, 'lahir')" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Bayi</label>
+                                    <input type="text" name="nama" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Nama lengkap bayi">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">NIK Bayi / No Akta</label>
+                                    <input type="text" name="nik" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Nomor NIK / Akta Kelahiran">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Kartu Keluarga (KK)</label>
+                                    <input type="text" name="no_kk" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="16 digit No KK">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor HP Pelapor / WhatsApp</label>
+                                    <input type="tel" name="no_hp" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Contoh: 0838...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Kelahiran</label>
+                                    <input type="date" name="tanggal" required class="w-full p-2.5 border rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan Tambahan</label>
+                                    <input type="text" name="keterangan" class="w-full p-2.5 border rounded-xl text-sm" placeholder="Tempat lahir, berat badan, dll">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Kirim Laporan Kelahiran</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabel Data Kelahiran -->
+                        <div class="bg-white p-6 rounded-2xl shadow-md border overflow-x-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-base text-slate-900">Data Pengajuan Kelahiran Warga</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="exportTableToExcel('table-lahir', 'Laporan_Kelahiran_Cicangkanghilir.xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-excel mr-1"></i> Excel</button>
+                                    <button onclick="exportTableToPDF('Laporan Kelahiran Warga', 'table-lahir')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                                </div>
+                            </div>
+                            <table id="table-lahir" class="w-full text-left text-sm">
+                                <thead class="bg-slate-100 text-slate-700 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-3">Nama Bayi</th>
+                                        <th class="p-3">NIK / Akta</th>
+                                        <th class="p-3">No. KK</th>
+                                        <th class="p-3">No. HP</th>
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-lahir" class="divide-y divide-slate-200">
+                                    <!-- Diisi via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2. Form & Tabel Kematian -->
+                    <div id="kep-sub-mati" class="kep-sub-pane space-y-6 hidden">
+                        <div class="bg-white p-6 rounded-2xl shadow-md border">
+                            <h3 class="font-bold text-lg text-slate-900 mb-4"><i class="fas fa-procedures text-red-600 mr-2"></i> Form Pengajuan Laporan Kematian</h3>
+                            <form id="form-mati" onsubmit="handleKependudukanSubmit(event, 'mati')" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Almarhum / Almarhumah</label>
+                                    <input type="text" name="nama" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Nama lengkap">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">NIK Almarhum</label>
+                                    <input type="text" name="nik" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="16 digit NIK">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Kartu Keluarga (KK)</label>
+                                    <input type="text" name="no_kk" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="No KK">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP Pelapor</label>
+                                    <input type="tel" name="no_hp" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="08xx...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Kematian</label>
+                                    <input type="date" name="tanggal" required class="w-full p-2.5 border rounded-xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Sebab Kematian</label>
+                                    <input type="text" name="sebab" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Sakit, Usia Lanjut, Rumah Sakit, dll">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Upload Foto Surat Keterangan Rumah Sakit / Desa (Wajib jika di RS)</label>
+                                    <input type="file" name="lampiran" accept="image/*" class="w-full p-2 border rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Kirim Laporan Kematian</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabel Data Kematian -->
+                        <div class="bg-white p-6 rounded-2xl shadow-md border overflow-x-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-base text-slate-900">Data Pengajuan Kematian Warga</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="exportTableToExcel('table-mati', 'Laporan_Kematian_Cicangkanghilir.xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-excel mr-1"></i> Excel</button>
+                                    <button onclick="exportTableToPDF('Laporan Kematian Warga', 'table-mati')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                                </div>
+                            </div>
+                            <table id="table-mati" class="w-full text-left text-sm">
+                                <thead class="bg-slate-100 text-slate-700 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-3">Nama</th>
+                                        <th class="p-3">NIK</th>
+                                        <th class="p-3">No. KK</th>
+                                        <th class="p-3">No. HP</th>
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Sebab</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-mati" class="divide-y divide-slate-200">
+                                    <!-- Diisi via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. Form & Tabel Pindah Datang -->
+                    <div id="kep-sub-pindah" class="kep-sub-pane space-y-6 hidden">
+                        <div class="bg-white p-6 rounded-2xl shadow-md border">
+                            <h3 class="font-bold text-lg text-slate-900 mb-4"><i class="fas fa-exchange-alt text-blue-600 mr-2"></i> Form Laporan Pindah Datang Warga</h3>
+                            <form id="form-pindah" onsubmit="handleKependudukanSubmit(event, 'pindah')" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Kepala Keluarga / Warga</label>
+                                    <input type="text" name="nama" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Nama lengkap">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">NIK</label>
+                                    <input type="text" name="nik" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="16 digit NIK">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Kartu Keluarga (KK)</label>
+                                    <input type="text" name="no_kk" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="No KK">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">No. HP Pelapor</label>
+                                    <input type="tel" name="no_hp" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="08xx...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Asal / Tujuan Alamat</label>
+                                    <input type="text" name="asal_tujuan" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Desa/Kecamatan asal atau tujuan pindah">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Alasan Pindah / Datang</label>
+                                    <input type="text" name="alasan" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Pekerjaan, Domisili baru, dll">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Kirim Laporan Pindah Datang</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tabel Data Pindah Datang -->
+                        <div class="bg-white p-6 rounded-2xl shadow-md border overflow-x-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-base text-slate-900">Data Pindah Datang Warga</h3>
+                                <div class="flex gap-2">
+                                    <button onclick="exportTableToExcel('table-pindah', 'Laporan_PindahDatang_Cicangkanghilir.xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-excel mr-1"></i> Excel</button>
+                                    <button onclick="exportTableToPDF('Laporan Pindah Datang Warga', 'table-pindah')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                                </div>
+                            </div>
+                            <table id="table-pindah" class="w-full text-left text-sm">
+                                <thead class="bg-slate-100 text-slate-700 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-3">Nama</th>
+                                        <th class="p-3">NIK</th>
+                                        <th class="p-3">No. KK</th>
+                                        <th class="p-3">No. HP</th>
+                                        <th class="p-3">Asal / Tujuan</th>
+                                        <th class="p-3">Alasan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-pindah" class="divide-y divide-slate-200">
+                                    <!-- Diisi via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: LINGKUNGAN SOSIAL ==================== -->
+        <section id="tab-lingkungan" class="tab-content hidden py-10 px-4">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100 px-3 py-1 rounded-full"><i class="fas fa-globe mr-1"></i> Publik & Partisipatif</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Lingkungan Sosial & Pengaduan Warga</h2>
+                        <p class="text-sm text-slate-600 mt-1">Laporkan kegiatan gotong royong, jalan rusak, atau ronda malam di lingkungan RW/RT Anda.</p>
+                    </div>
+                    <button onclick="openModal('laporan-sosial-modal')" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg transition flex items-center gap-2"><i class="fas fa-plus-circle"></i> Buat Laporan Baru</button>
+                </div>
+
+                <!-- Filter Kategori Lingkungan -->
+                <div class="flex gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+                    <button onclick="filterLingkungan('all')" class="ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white shadow" data-cat="all">Semua Laporan</button>
+                    <button onclick="filterLingkungan('Kerja Bakti')" class="ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300" data-cat="Kerja Bakti">Kerja Bakti & Sosial</button>
+                    <button onclick="filterLingkungan('Jalan Rusak')" class="ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300" data-cat="Jalan Rusak">Jalan Rusak</button>
+                    <button onclick="filterLingkungan('Keamanan & Ronda')" class="ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300" data-cat="Keamanan & Ronda">Keamanan & Ronda</button>
+                </div>
+
+                <!-- Grid Kartu Laporan Sosial -->
+                <div id="lingkungan-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Diisi via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: DATA RW & RT ==================== -->
+        <section id="tab-data-rw" class="tab-content hidden py-10 px-4">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100 px-3 py-1 rounded-full"><i class="fas fa-chart-bar mr-1"></i> Data Kewilayahan</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Data Administrator Warga per RW</h2>
+                        <p class="text-sm text-slate-600 mt-1">Rekapitulasi lengkap data kependudukan, PUS KB, Balita, Remaja, Lansia, dan UPPKS per RW.</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <select id="select-filter-rw" onchange="renderRwTable()" class="p-2.5 border rounded-xl text-sm font-semibold bg-white shadow">
+                            <option value="all">Semua RW (Desa)</option>
+                            <option value="RW 01">RW 01</option>
+                            <option value="RW 02">RW 02</option>
+                            <option value="RW 03">RW 03</option>
+                            <option value="RW 04">RW 04</option>
+                            <option value="RW 05">RW 05</option>
+                        </select>
+                        <button onclick="exportTableToExcel('table-rw-data', 'Rekap_Data_RW_Cicangkanghilir.xlsx')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-excel mr-1"></i> Excel</button>
+                        <button onclick="exportTableToPDF('Rekapitulasi Data Warga per RW', 'table-rw-data')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow"><i class="fas fa-file-pdf mr-1"></i> PDF</button>
+                    </div>
+                </div>
+
+                <!-- Tabel Data RW -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border overflow-x-auto">
+                    <table id="table-rw-data" class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-800 uppercase font-bold">
+                            <tr>
+                                <th class="p-3">RW</th>
+                                <th class="p-3">Total Warga</th>
+                                <th class="p-3">L / P</th>
+                                <th class="p-3">Total KK</th>
+                                <th class="p-3">PUS Hamil</th>
+                                <th class="p-3">PUS KB</th>
+                                <th class="p-3">BKB (Balita)</th>
+                                <th class="p-3">BKR (Remaja)</th>
+                                <th class="p-3">BKL (Lansia)</th>
+                                <th class="p-3">UPPKS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-rw" class="divide-y divide-slate-200">
+                            <!-- Diisi via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Chart RW -->
+                <div class="bg-white p-6 rounded-2xl shadow-md border">
+                    <h3 class="font-bold text-base text-slate-900 mb-4 text-center">Grafik Perbandingan Total Warga per RW</h3>
+                    <div class="h-72 flex justify-center"><canvas id="chartRwBar"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB: DASHBOARD ADMIN ==================== -->
+        <section id="tab-dashboard" class="tab-content hidden py-10 px-4">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-red-600 uppercase tracking-widest bg-red-100 px-3 py-1 rounded-full"><i class="fas fa-user-shield mr-1"></i> Panel Administrator</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mt-2">Dashboard Pengaturan & Admin Desa</h2>
+                        <p class="text-sm text-slate-600 mt-1">Kelola profil desa, publikasi pengumuman, data RW, serta moderasi laporan warga.</p>
+                    </div>
+                    <div id="admin-badge-status">
+                        <!-- Status Admin -->
+                    </div>
+                </div>
+
+                <!-- Alert Jika Bukan Admin -->
+                <div id="admin-lock-alert" class="bg-red-50 border-l-4 border-red-500 p-6 rounded-2xl shadow-md text-center">
+                    <i class="fas fa-shield-alt text-3xl text-red-500 mb-2"></i>
+                    <h3 class="font-bold text-lg text-red-900">Akses Dibatasi Khusus Admin</h3>
+                    <p class="text-sm text-red-700 max-w-md mx-auto mt-1 mb-4">Silakan masuk menggunakan akun Administrator desa untuk mengelola konten dan pengaturan sistem.</p>
+                    <button onclick="openModal('login-modal')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl shadow transition">Login sebagai Admin</button>
+                </div>
+
+                <!-- Panel Konten Admin (Tampil Jika Admin) -->
+                <div id="admin-content-panel" class="hidden space-y-8">
+                    <!-- Admin Sub Nav -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onclick="switchAdminSub('pengumuman')" class="admin-sub-btn p-4 rounded-2xl bg-brand-600 text-white font-bold text-sm shadow text-center"><i class="fas fa-bullhorn mb-1 block text-lg"></i> Publikasi Pengumuman</button>
+                        <button onclick="switchAdminSub('rw-edit')" class="admin-sub-btn p-4 rounded-2xl bg-white text-slate-700 hover:bg-slate-100 font-bold text-sm shadow border text-center"><i class="fas fa-edit mb-1 block text-lg"></i> Kelola Data RW/RT</button>
+                        <button onclick="switchAdminSub('setting')" class="admin-sub-btn p-4 rounded-2xl bg-white text-slate-700 hover:bg-slate-100 font-bold text-sm shadow border text-center"><i class="fas fa-cog mb-1 block text-lg"></i> Pengaturan Desa</button>
+                        <button onclick="switchAdminSub('laporan-mod')" class="admin-sub-btn p-4 rounded-2xl bg-white text-slate-700 hover:bg-slate-100 font-bold text-sm shadow border text-center"><i class="fas fa-tasks mb-1 block text-lg"></i> Moderasi Laporan</button>
+                    </div>
+
+                    <!-- 1. Panel Publikasi Pengumuman -->
+                    <div id="adm-sub-pengumuman" class="adm-sub-pane bg-white p-6 rounded-2xl shadow-md border space-y-6">
+                        <h3 class="font-bold text-lg text-slate-900"><i class="fas fa-bullhorn text-brand-600 mr-2"></i> Buat Pengumuman Resmi Baru</h3>
+                        <form id="form-admin-pengumuman" onsubmit="handleAdminPengumuman(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Pengumuman</label>
+                                <input type="text" id="adm-p-title" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Judul pengumuman...">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Isi / Konten Pengumuman</label>
+                                <textarea id="adm-p-content" rows="4" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Tulis rincian pengumuman resmi..."></textarea>
+                            </div>
+                            <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Publish Pengumuman</button>
+                        </form>
+                    </div>
+
+                    <!-- 2. Panel Kelola Data RW -->
+                    <div id="adm-sub-rw-edit" class="adm-sub-pane bg-white p-6 rounded-2xl shadow-md border space-y-6 hidden">
+                        <h3 class="font-bold text-lg text-slate-900"><i class="fas fa-edit text-brand-600 mr-2"></i> Update Data Statistik Per RW</h3>
+                        <form id="form-admin-rw" onsubmit="handleAdminRwUpdate(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih RW</label>
+                                <select id="adm-rw-name" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+                                    <option value="RW 01">RW 01</option>
+                                    <option value="RW 02">RW 02</option>
+                                    <option value="RW 03">RW 03</option>
+                                    <option value="RW 04">RW 04</option>
+                                    <option value="RW 05">RW 05</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Warga</label>
+                                <input type="number" id="adm-rw-warga" required class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Laki-laki</label>
+                                <input type="number" id="adm-rw-l" required class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Total Perempuan</label>
+                                <input type="number" id="adm-rw-p" required class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Total KK</label>
+                                <input type="number" id="adm-rw-kk" required class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">PUS Hamil</label>
+                                <input type="number" id="adm-rw-pus" required class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-3">
+                                <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Simpan Pembaruan Data RW</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 3. Panel Pengaturan Identitas Desa -->
+                    <div id="adm-sub-setting" class="adm-sub-pane bg-white p-6 rounded-2xl shadow-md border space-y-6 hidden">
+                        <h3 class="font-bold text-lg text-slate-900"><i class="fas fa-cog text-brand-600 mr-2"></i> Pengaturan Identitas & Kontak Desa</h3>
+                        <form id="form-admin-setting" onsubmit="handleAdminSetting(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Desa</label>
+                                <input type="text" id="set-nama-desa" value="DESA CICANGKANGHILIR" class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat Kantor Desa</label>
+                                <input type="text" id="set-alamat-desa" value="Jl. Cijambe No. 5, Cicangkanghilir, Cipongkor, Bandung Barat, 40564" class="w-full p-2.5 border rounded-xl text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Visi Desa</label>
+                                <textarea id="set-visi-desa" rows="2" class="w-full p-2.5 border rounded-xl text-sm">Terwujudnya Desa Cicangkanghilir yang Maju, Religius, Sejahtera, dan Berbasis Teknologi Pelayanan Digital.</textarea>
+                            </div>
+                            <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow">Simpan Pengaturan</button>
+                        </form>
+                    </div>
+
+                    <!-- 4. Panel Moderasi Laporan -->
+                    <div id="adm-sub-laporan-mod" class="adm-sub-pane bg-white p-6 rounded-2xl shadow-md border space-y-6 hidden">
+                        <h3 class="font-bold text-lg text-slate-900"><i class="fas fa-tasks text-brand-600 mr-2"></i> Moderasi & Hapus Laporan Masuk</h3>
+                        <p class="text-xs text-slate-500">Daftar seluruh laporan warga yang masuk dapat dihapus atau dikelola oleh admin.</p>
+                        <div id="admin-mod-list" class="space-y-3">
+                            <!-- Diisi via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Resmi -->
+    <footer class="bg-navy-900 text-white pt-12 pb-6 mt-16 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xl shadow">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base tracking-wide leading-tight">DESA CICANGKANGHILIR</h2>
+                        <p class="text-xs text-brand-400">Kec. Cipongkor, Kab. Bandung Barat</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed mb-4">Portal resmi digitalisasi layanan desa, pelaporan warga, dan transparansi informasi publik.</p>
+                <div class="flex gap-3 text-lg">
+                    <a href="https://maps.app.goo.gl/JmgxrkzWKoFWqp1BA" target="_blank" class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="fas fa-map-marker-alt"></i></a>
+                    <a href="https://wa.me/6283805319924" target="_blank" class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="fab fa-whatsapp"></i></a>
+                    <a href="mailto:cicangkanghilir.desa@gmail.com" class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 transition"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm text-brand-400 uppercase tracking-wider mb-4">Tautan Cepat</h3>
+                <ul class="space-y-2 text-xs text-slate-300">
+                    <li><button onclick="switchTab('beranda')" class="hover:text-white transition">Beranda Utama</button></li>
+                    <li><button onclick="switchTab('profil')" class="hover:text-white transition">Profil & Visi Misi Desa</button></li>
+                    <li><button onclick="switchTab('kependudukan')" class="hover:text-white transition">Layanan Kependudukan Privat</button></li>
+                    <li><button onclick="switchTab('lingkungan')" class="hover:text-white transition">Laporan Lingkungan Sosial</button></li>
+                    <li><button onclick="switchTab('data-rw')" class="hover:text-white transition">Data Statistik RW & RT</button></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm text-brand-400 uppercase tracking-wider mb-4">Kontak & Layanan Resmi</h3>
+                <p class="text-xs text-slate-300 mb-2"><strong>Alamat:</strong> Jl. Cijambe No. 5, Cicangkanghilir, Cipongkor, Bandung Barat, 40564</p>
+                <p class="text-xs text-slate-300 mb-2"><strong>WhatsApp 1:</strong> +62 838-0531-9924 (Rayiman Nurhikmat)</p>
+                <p class="text-xs text-slate-300 mb-2"><strong>WhatsApp 2:</strong> +62 838-2213-4343 (M. Kusaeri)</p>
+                <p class="text-xs text-slate-300"><strong>Email:</strong> cicangkanghilir.desa@gmail.com</p>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
+            &copy; 2026 Pemerintah Desa Cicangkanghilir, Kecamatan Cipongkor, Kabupaten Bandung Barat. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal Login / Register -->
+    <div id="login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+            <button onclick="closeModal('login-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-lg"><i class="fas fa-times"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl mx-auto flex items-center justify-center text-xl font-bold mb-2"><i class="fas fa-user-circle"></i></div>
+                <h3 class="font-extrabold text-xl text-slate-900">Masuk atau Daftar Warga</h3>
+                <p class="text-xs text-slate-500 mt-1">Akses fitur pengaduan privat, buku tamu, dan layanan desa.</p>
+            </div>
+            <form id="form-auth" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                    <input type="text" id="auth-name" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Nama warga...">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor NIK / Email</label>
+                    <input type="text" id="auth-id" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="16 digit NIK atau email aktif...">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Peran Akun</label>
+                    <select id="auth-role" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+                        <option value="warga">Warga Biasa / Pengguna</option>
+                        <option value="admin">Administrator Desa</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow transition text-sm">Masuk / Simpan Akun</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Buat Laporan Lingkungan Sosial -->
+    <div id="laporan-sosial-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('laporan-sosial-modal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-lg"><i class="fas fa-times"></i></button>
+            <h3 class="font-extrabold text-xl text-slate-900 mb-4"><i class="fas fa-bullhorn text-brand-600 mr-2"></i> Buat Laporan Lingkungan / Sosial</h3>
+            <form id="form-laporan-sosial" onsubmit="handleLaporanSosialSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Laporan / Kegiatan</label>
+                    <select id="ls-kategori" class="w-full p-2.5 border rounded-xl text-sm font-semibold">
+                        <option value="Kerja Bakti">Kerja Bakti & Sosial</option>
+                        <option value="Jalan Rusak">Laporan Jalan Rusak</option>
+                        <option value="Keamanan & Ronda">Keamanan & Ronda Malam</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Laporan / Kegiatan</label>
+                    <input type="text" id="ls-judul" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Contoh: Gotong royong pembersihan saluran air RW 03">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih RW</label>
+                        <select id="ls-rw" class="w-full p-2.5 border rounded-xl text-sm">
+                            <option value="RW 01">RW 01</option>
+                            <option value="RW 02">RW 02</option>
+                            <option value="RW 03">RW 03</option>
+                            <option value="RW 04">RW 04</option>
+                            <option value="RW 05">RW 05</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor RT</label>
+                        <input type="text" id="ls-rt" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Contoh: RT 02">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Kegiatan / Kejadian</label>
+                    <input type="date" id="ls-tanggal" required class="w-full p-2.5 border rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi Lengkap</label>
+                    <textarea id="ls-deskripsi" rows="3" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="Uraikan kondisi atau rincian kegiatan..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Link URL Foto Kegiatan (Minimal 3 atau URL Gambar)</label>
+                    <input type="text" id="ls-foto" required class="w-full p-2.5 border rounded-xl text-sm" placeholder="https://images.unsplash.com/... (atau pisahkan dengan koma)">
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow transition text-sm">Kirim Laporan Publik</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN JAVASCRIPT ==================== -->
+    <script>
+        // Data Store Awal (localStorage handler)
+        const defaultRwData = [
+            { rw: 'RW 01', warga: 1750, l: 890, p: 860, kk: 480, pusHamil: 14, pusKb: 210, bkb: 85, bkr: 120, bkl: 95, uppks: 3 },
+            { rw: 'RW 02', warga: 1620, l: 820, p: 800, kk: 440, pusHamil: 11, pusKb: 195, bkb: 72, bkr: 110, bkl: 88, uppks: 2 },
+            { rw: 'RW 03', warga: 1890, l: 960, p: 930, kk: 520, pusHamil: 18, pusKb: 240, bkb: 95, bkr: 140, bkl: 105, uppks: 4 },
+            { rw: 'RW 04', warga: 1540, l: 780, p: 760, kk: 410, pusHamil: 9,  pusKb: 180, bkb: 65, bkr: 98,  bkl: 75,  uppks: 2 },
+            { rw: 'RW 05', warga: 1650, l: 840, p: 810, kk: 450, pusHamil: 12, pusKb: 200, bkb: 78, bkr: 105, bkl: 82,  uppks: 3 }
+        ];
+
+        let appData = {
+            currentUser: JSON.parse(localStorage.getItem('cicangkang_user')) || null,
+            rwData: JSON.parse(localStorage.getItem('cicangkang_rw')) || defaultRwData,
+            guestbook: JSON.parse(localStorage.getItem('cicangkang_gb')) || [
+                { name: 'Bpk. Ahmad (Ketua RT 01)', date: '2026-10-27', message: 'Alhamdulillah pelayanan posyandu dan pengajuan surat sekarang makin mudah lewat web desa ini.' },
+                { name: 'Siti Rahmawati', date: '2026-10-26', message: 'Mohon peninjauan lampu penerangan jalan di sekitar tanjakan Cicangkanghilir.' }
+            ],
+            pengumuman: JSON.parse(localStorage.getItem('cicangkang_pengumuman')) || [
+                { title: 'Jadwal Pelayanan Pembuatan KTP & UHC BPJS Keliling', date: '2026-10-28', content: 'Kepada seluruh warga Desa Cicangkanghilir, pelayanan jemput bola administrasi kependudukan akan hadir di tiap kantor RW mulai minggu depan.' }
+            ],
+            laporanSosial: JSON.parse(localStorage.getItem('cicangkang_ls')) || [
+                { id: 1, kategori: 'Kerja Bakti', judul: 'Pembersihan Saluran Air Utama RW 03', rw: 'RW 03', rt: 'RT 01', tanggal: '2026-10-25', deskripsi: 'Warga bersama pemuda setempat melaksanakan gotong royong membersihkan saluran air menjelang musim hujan.', foto: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600' },
+                { id: 2, kategori: 'Jalan Rusak', judul: 'Perbaikan Sementara Jalan Lingkungan RT 02', rw: 'RW 01', rt: 'RT 02', tanggal: '2026-10-24', deskripsi: 'Menambal lubang jalan desa secara swadaya agar aman dilalui pengendara roda dua.', foto: 'https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6?auto=format&fit=crop&q=80&w=600' }
+            ],
+            kependudukanLahir: JSON.parse(localStorage.getItem('cicangkang_lahir')) || [
+                { nama: 'Muhammad Al Fatih', nik: '3217082026001', no_kk: '32170811002233', no_hp: '083805319924', tanggal: '2026-10-20', keterangan: 'Lahir sehat di Bidan Desa' }
+            ],
+            kependudukanMati: JSON.parse(localStorage.getItem('cicangkang_mati')) || [
+                { nama: 'H. Abdul Rojak', nik: '32170850195500', no_kk: '32170811004455', no_hp: '083822134343', tanggal: '2026-10-18', sebab: 'Usia Lanjut' }
+            ],
+            kependudukanPindah: JSON.parse(localStorage.getItem('cicangkang_pindah')) || [
+                { nama: 'Dedi Supriadi', nik: '32170870192000', no_kk: '32170811009988', no_hp: '081234567890', asal_tujuan: 'Bandung Kota', alasan: 'Pindah Tugas Pekerjaan' }
+            ]
+        };
+
+        function saveToStorage() {
+            localStorage.setItem('cicangkang_user', JSON.stringify(appData.currentUser));
+            localStorage.setItem('cicangkang_rw', JSON.stringify(appData.rwData));
+            localStorage.setItem('cicangkang_gb', JSON.stringify(appData.guestbook));
+            localStorage.setItem('cicangkang_pengumuman', JSON.stringify(appData.pengumuman));
+            localStorage.setItem('cicangkang_ls', JSON.stringify(appData.laporanSosial));
+            localStorage.setItem('cicangkang_lahir', JSON.stringify(appData.kependudukanLahir));
+            localStorage.setItem('cicangkang_mati', JSON.stringify(appData.kependudukanMati));
+            localStorage.setItem('cicangkang_pindah', JSON.stringify(appData.kependudukanPindah));
+        }
+
+        // Navigation Tabs Controller
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700');
+                if(btn.dataset.target === tabId) btn.classList.add('bg-brand-700');
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Auth Handler
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('auth-name').value;
+            const id = document.getElementById('auth-id').value;
+            const role = document.getElementById('auth-role').value;
+
+            appData.currentUser = { name, id, role };
+            saveToStorage();
+            closeModal('login-modal');
+            renderAuthUI();
+            alert(`Berhasil masuk sebagai ${name} (${role === 'admin' ? 'Administrator' : 'Warga'})`);
+        }
+
+        function logout() {
+            appData.currentUser = null;
+            saveToStorage();
+            renderAuthUI();
+            alert('Berhasil keluar akun.');
+            switchTab('beranda');
+        }
+
+        function renderAuthUI() {
+            const authArea = document.getElementById('auth-area');
+            const guestForm = document.getElementById('guestbook-form-container');
+            const guestPrompt = document.getElementById('guestbook-login-prompt');
+            const kepLock = document.getElementById('kependudukan-lock-alert');
+            const kepContent = document.getElementById('kependudukan-content');
+            const kepAction = document.getElementById('kependudukan-action-btn');
+            const adminLock = document.getElementById('admin-lock-alert');
+            const adminPanel = document.getElementById('admin-content-panel');
+            const adminBadge = document.getElementById('admin-badge-status');
+
+            if(appData.currentUser) {
+                authArea.innerHTML = `
+                    <div class="flex items-center gap-2 bg-brand-700 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                        <i class="fas fa-user-circle"></i>
+                        <span>${appData.currentUser.name} (${appData.currentUser.role})</span>
+                        <button onclick="logout()" class="ml-2 text-red-200 hover:text-white"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                `;
+                if(guestForm) guestForm.classList.remove('hidden');
+                if(guestPrompt) guestPrompt.classList.add('hidden');
+                if(kepLock) kepLock.classList.add('hidden');
+                if(kepContent) kepContent.classList.remove('hidden');
+                if(kepAction) kepAction.innerHTML = `<span class="bg-brand-100 text-brand-800 text-xs font-bold px-3 py-2 rounded-xl"><i class="fas fa-check-circle mr-1"></i> Akses Privat Aktif</span>`;
+
+                if(appData.currentUser.role === 'admin') {
+                    if(adminLock) adminLock.classList.add('hidden');
+                    if(adminPanel) adminPanel.classList.remove('hidden');
+                    if(adminBadge) adminBadge.innerHTML = `<span class="bg-red-100 text-red-800 text-xs font-bold px-3 py-2 rounded-xl"><i class="fas fa-shield-alt mr-1"></i> Administrator Aktif</span>`;
+                } else {
+                    if(adminLock) adminLock.classList.remove('hidden');
+                    if(adminPanel) adminPanel.classList.add('hidden');
+                    if(adminBadge) adminBadge.innerHTML = `<span class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-2 rounded-xl">Bukan Admin</span>`;
+                }
+            } else {
+                authArea.innerHTML = `<button onclick="openModal('login-modal')" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow"><i class="fas fa-sign-in-alt mr-1"></i> Masuk / Daftar</button>`;
+                if(guestForm) guestForm.classList.add('hidden');
+                if(guestPrompt) guestPrompt.classList.remove('hidden');
+                if(kepLock) kepLock.classList.remove('hidden');
+                if(kepContent) kepContent.classList.add('hidden');
+                if(kepAction) kepAction.innerHTML = '';
+                if(adminLock) adminLock.classList.remove('hidden');
+                if(adminPanel) adminPanel.classList.add('hidden');
+                if(adminBadge) adminBadge.innerHTML = '';
+            }
+            renderGuestbook();
+            renderLingkungan();
+            renderRwTable();
+            renderAdminModList();
+        }
+
+        // Render Beranda & Pengumuman
+        function renderBeranda() {
+            // Statistik
+            const totalWarga = appData.rwData.reduce((acc, curr) => acc + curr.warga, 0);
+            document.getElementById('stat-total-warga').innerText = totalWarga.toLocaleString('id-ID');
+            document.getElementById('stat-total-laporan').innerText = (appData.laporanSosial.length + appData.kependudukanLahir.length + appData.kependudukanMati.length);
+            document.getElementById('stat-total-lahir').innerText = appData.kependudukanLahir.length;
+            document.getElementById('stat-total-kegiatan').innerText = appData.laporanSosial.length;
+
+            // Pengumuman
+            const pList = document.getElementById('beranda-pengumuman-list');
+            pList.innerHTML = appData.pengumuman.slice(0, 2).map(p => `
+                <div class="bg-white/10 p-4 rounded-xl backdrop-blur border border-white/10">
+                    <span class="text-xs text-amber-300 font-semibold">${p.date}</span>
+                    <h4 class="font-bold text-base mt-1">${p.title}</h4>
+                    <p class="text-xs text-slate-200 mt-1">${p.content}</p>
+                </div>
+            `).join('');
+
+            // Laporan Publik
+            const lList = document.getElementById('beranda-laporan-list');
+            lList.innerHTML = appData.laporanSosial.slice(0, 2).map(item => `
+                <div class="bg-slate-50 border rounded-2xl p-4 flex flex-col justify-between">
+                    <div>
+                        <span class="bg-brand-100 text-brand-800 text-xs font-bold px-2.5 py-1 rounded-md">${item.kategori}</span>
+                        <h4 class="font-bold text-base text-slate-900 mt-2">${item.judul}</h4>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fas fa-map-marker-alt text-brand-600 mr-1"></i> ${item.rw} / ${item.rt} | <i class="fas fa-calendar mr-1"></i> ${item.tanggal}</p>
+                        <p class="text-xs text-slate-700 mt-2">${item.deskripsi}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Guestbook Handler
+        function handleGuestbookSubmit(e) {
+            e.preventDefault();
+            const message = document.getElementById('gb-message').value;
+            const name = appData.currentUser ? appData.currentUser.name : 'Warga';
+            const date = new Date().toISOString().split('T')[0];
+
+            appData.guestbook.unshift({ name, date, message });
+            saveToStorage();
+            document.getElementById('form-guestbook').reset();
+            renderGuestbook();
+            alert('Catatan berhasil dikirim ke buku tamu desa.');
+        }
+
+        function renderGuestbook() {
+            const list = document.getElementById('guestbook-list');
+            list.innerHTML = appData.guestbook.map(gb => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-1">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-sm text-slate-900"><i class="fas fa-user-circle text-brand-600 mr-1"></i> ${gb.name}</h4>
+                        <span class="text-xs text-slate-400">${gb.date}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 mt-1">${gb.message}</p>
+                </div>
+            `).join('');
+        }
+
+        // Kependudukan Sub-Tabs & Form
+        function switchKepSub(sub) {
+            document.querySelectorAll('.kep-sub-pane').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`kep-sub-${sub}`).classList.remove('hidden');
+            document.querySelectorAll('.kep-sub-btn').forEach(btn => {
+                btn.className = "kep-sub-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300";
+            });
+            event.currentTarget.className = "kep-sub-btn px-4 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white shadow";
+        }
+
+        function handleKependudukanSubmit(e, type) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const dataObj = {};
+            formData.forEach((value, key) => { dataObj[key] = value; });
+
+            if(type === 'lahir') {
+                appData.kependudukanLahir.unshift(dataObj);
+                renderKependudukanTables();
+                alert('Laporan Kelahiran berhasil diajukan!');
+            } else if(type === 'mati') {
+                appData.kependudukanMati.unshift(dataObj);
+                renderKependudukanTables();
+                alert('Laporan Kematian berhasil diajukan!');
+            } else if(type === 'pindah') {
+                appData.kependudukanPindah.unshift(dataObj);
+                renderKependudukanTables();
+                alert('Laporan Pindah Datang berhasil diajukan!');
+            }
+            saveToStorage();
+            form.reset();
+            renderBeranda();
+        }
+
+        function renderKependudukanTables() {
+            document.getElementById('tbody-lahir').innerHTML = appData.kependudukanLahir.map(item => `
+                <tr>
+                    <td class="p-3 font-semibold">${item.nama}</td>
+                    <td class="p-3">${item.nik}</td>
+                    <td class="p-3">${item.no_kk}</td>
+                    <td class="p-3">${item.no_hp}</td>
+                    <td class="p-3">${item.tanggal}</td>
+                    <td class="p-3">${item.keterangan || '-'}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('tbody-mati').innerHTML = appData.kependudukanMati.map(item => `
+                <tr>
+                    <td class="p-3 font-semibold">${item.nama}</td>
+                    <td class="p-3">${item.nik}</td>
+                    <td class="p-3">${item.no_kk}</td>
+                    <td class="p-3">${item.no_hp}</td>
+                    <td class="p-3">${item.tanggal}</td>
+                    <td class="p-3">${item.sebab}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('tbody-pindah').innerHTML = appData.kependudukanPindah.map(item => `
+                <tr>
+                    <td class="p-3 font-semibold">${item.nama}</td>
+                    <td class="p-3">${item.nik}</td>
+                    <td class="p-3">${item.no_kk}</td>
+                    <td class="p-3">${item.no_hp}</td>
+                    <td class="p-3">${item.asal_tujuan}</td>
+                    <td class="p-3">${item.alasan}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Lingkungan Sosial Handler
+        function handleLaporanSosialSubmit(e) {
+            e.preventDefault();
+            const kategori = document.getElementById('ls-kategori').value;
+            const judul = document.getElementById('ls-judul').value;
+            const rw = document.getElementById('ls-rw').value;
+            const rt = document.getElementById('ls-rt').value;
+            const tanggal = document.getElementById('ls-tanggal').value;
+            const deskripsi = document.getElementById('ls-deskripsi').value;
+            const foto = document.getElementById('ls-foto').value;
+
+            appData.laporanSosial.unshift({ id: Date.now(), kategori, judul, rw, rt, tanggal, deskripsi, foto });
+            saveToStorage();
+            closeModal('laporan-sosial-modal');
+            document.getElementById('form-laporan-sosial').reset();
+            renderLingkungan();
+            renderBeranda();
+            alert('Laporan Lingkungan Sosial berhasil dipublikasikan!');
+        }
+
+        function filterLingkungan(cat) {
+            document.querySelectorAll('.ling-filter-btn').forEach(btn => {
+                btn.className = "ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-slate-200 text-slate-700 hover:bg-slate-300";
+            });
+            event.currentTarget.className = "ling-filter-btn px-4 py-2 rounded-xl font-bold text-sm bg-brand-600 text-white shadow";
+            renderLingkungan(cat);
+        }
+
+        function renderLingkungan(filter = 'all') {
+            const grid = document.getElementById('lingkungan-grid');
+            let data = appData.laporanSosial;
+            if(filter !== 'all') {
+                data = data.filter(item => item.kategori === filter);
+            }
+
+            grid.innerHTML = data.map(item => `
+                bg-white p-5 rounded-2xl shadow-md border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <div class="h-48 rounded-xl overflow-hidden mb-3 bg-slate-100">
+                            <img src="${item.foto}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=600'">
+                        </div>
+                        <span class="bg-brand-100 text-brand-800 text-xs font-bold px-2.5 py-1 rounded-md">${item.kategori}</span>
+                        <h4 class="font-bold text-base text-slate-900 mt-2">${item.judul}</h4>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fas fa-map-marker-alt text-brand-600 mr-1"></i> ${item.rw} / ${item.rt} | <i class="fas fa-calendar mr-1"></i> ${item.tanggal}</p>
+                        <p class="text-xs text-slate-700 mt-2">${item.deskripsi}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Data RW Table & Filter
+        function renderRwTable() {
+            const filterRw = document.getElementById('select-filter-rw').value;
+            let data = appData.rwData;
+            if(filterRw !== 'all') {
+                data = data.filter(d => d.rw === filterRw);
+            }
+
+            const tbody = document.getElementById('tbody-rw');
+            tbody.innerHTML = data.map(d => `
+                <tr>
+                    <td class="p-3 font-bold text-brand-800">${d.rw}</td>
+                    <td class="p-3 font-bold">${d.warga.toLocaleString('id-ID')}</td>
+                    <td class="p-3">${d.warga} (${d.l} L / ${d.p} P)</td>
+                    <td class="p-3">${d.kk}</td>
+                    <td class="p-3">${d.pusHamil}</td>
+                    <td class="p-3">${d.pusKb}</td>
+                    <td class="p-3">${d.bkb}</td>
+                    <td class="p-3">${d.bkr}</td>
+                    <td class="p-3">${d.bkl}</td>
+                    <td class="p-3">${d.uppks}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Admin Actions
+        function switchAdminSub(sub) {
+            document.querySelectorAll('.adm-sub-pane').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`adm-sub-${sub}`).classList.remove('hidden');
+            document.querySelectorAll('.admin-sub-btn').forEach(btn => {
+                btn.className = "admin-sub-btn p-4 rounded-2xl bg-white text-slate-700 hover:bg-slate-100 font-bold text-sm shadow border text-center";
+            });
+            event.currentTarget.className = "admin-sub-btn p-4 rounded-2xl bg-brand-600 text-white font-bold text-sm shadow text-center";
+        }
+
+        function handleAdminPengumuman(e) {
+            e.preventDefault();
+            const title = document.getElementById('adm-p-title').value;
+            const content = document.getElementById('adm-p-content').value;
+            const date = new Date().toISOString().split('T')[0];
+
+            appData.pengumuman.unshift({ title, date, content });
+            saveToStorage();
+            e.target.reset();
+            renderBeranda();
+            alert('Pengumuman resmi desa berhasil dipublikasikan!');
+        }
+
+        function handleAdminRwUpdate(e) {
+            e.preventDefault();
+            const rwName = document.getElementById('adm-rw-name').value;
+            const warga = parseInt(document.getElementById('adm-rw-warga').value);
+            const l = parseInt(document.getElementById('adm-rw-l').value);
+            const p = parseInt(document.getElementById('adm-rw-p').value);
+            const kk = parseInt(document.getElementById('adm-rw-kk').value);
+            const pusHamil = parseInt(document.getElementById('adm-rw-pus').value);
+
+            const index = appData.rwData.findIndex(d => d.rw === rwName);
+            if(index !== -1) {
+                appData.rwData[index].warga = warga;
+                appData.rwData[index].l = l;
+                appData.rwData[index].p = p;
+                appData.rwData[index].kk = kk;
+                appData.rwData[index].pusHamil = pusHamil;
+                saveToStorage();
+                renderRwTable();
+                renderBeranda();
+                initCharts();
+                alert(`Data statistik ${rwName} berhasil diperbarui.`);
+            }
+        }
+
+        function handleAdminSetting(e) {
+            e.preventDefault();
+            alert('Pengaturan identitas desa berhasil disimpan.');
+        }
+
+        function renderAdminModList() {
+            const list = document.getElementById('admin-mod-list');
+            if(!list) return;
+            list.innerHTML = appData.laporanSosial.map(item => `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border">
+                    <div>
+                        <h4 class="font-bold text-sm">${item.judul} (${item.rw})</h4>
+                        <p class="text-xs text-slate-500">${item.kategori} - ${item.tanggal}</p>
+                    </div>
+                    <button onclick="deleteLaporanSosial(${item.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg shadow"><i class="fas fa-trash"></i> Hapus</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteLaporanSosial(id) {
+            if(confirm('Yakin ingin menghapus laporan ini?')) {
+                appData.laporanSosial = appData.laporanSosial.filter(i => i.id !== id);
+                saveToStorage();
+                renderLingkungan();
+                renderBeranda();
+                renderAdminModList();
+                alert('Laporan berhasil dihapus.');
+            }
+        }
+
+        // ==================== EXPORT UTILS (EXCEL & PDF) ====================
+        
+        // 1. Ekspor ke Excel via SheetJS
+        function exportTableToExcel(tableId, filename = 'Data_Desa_Cicangkanghilir.xlsx') {
+            const table = document.getElementById(tableId);
+            if(!table) {
+                alert('Tabel tidak ditemukan.');
+                return;
+            }
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Laporan Desa"});
+            XLSX.writeFile(wb, filename);
+        }
+
+        // 2. Ekspor ke PDF via jsPDF & AutoTable (Kop Surat Resmi Pemerintah KBB)
+        function exportTableToPDF(titleText, tableId) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+
+            // Kop Surat Pemerintah
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("PEMERINTAH KABUPATEN BANDUNG BARAT", 148, 15, { align: "center" });
+            doc.setFontSize(12);
+            doc.text("KECAMATAN CIPONGKOR", 148, 22, { align: "center" });
+            doc.setFontSize(16);
+            doc.text("DESA CICANGKANGHILIR", 148, 30, { align: "center" });
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.text("Jl. Cijambe No. 5, Cicangkanghilir, Cipongkor, Kab. Bandung Barat, Kode Pos 40564", 148, 36, { align: "center" });
+            
+            // Garis Kop Surat
+            doc.setLineWidth(0.8);
+            doc.line(14, 40, 283, 40);
+            doc.setLineWidth(0.2);
+            doc.line(14, 41, 283, 41);
+
+            // Judul Laporan
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text(titleText.toUpperCase(), 148, 52, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            const todayStr = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            doc.text(`Tanggal Cetak: ${todayStr}`, 14, 60);
+
+            // AutoTable dari HTML Table
+            doc.autoTable({
+                html: `#${tableId}`,
+                startY: 65,
+                theme: 'grid',
+                headStyles: { fillColor: [22, 163, 74] }, // Warna brand green
+                styles: { fontSize: 8, cellPadding: 3 }
+            });
+
+            // Tanda Tangan Kepala Desa
+            const finalY = doc.lastAutoTable.finalY + 15;
+            const pageHeight = doc.internal.pageSize.height;
+            let signY = finalY > pageHeight - 40 ? pageHeight - 40 : finalY;
+
+            doc.text("Cicangkanghilir, " + todayStr, 220, signY);
+            doc.text("Kepala Desa Cicangkanghilir,", 220, signY + 5);
+            doc.setFont("helvetica", "bold");
+            doc.text("AJID JAENUDIN, S.IP.", 220, signY + 25);
+            doc.setFont("helvetica", "normal");
+            doc.text("NIP. 19730406 200501 1 007", 220, signY + 30);
+
+            doc.save(`${titleText.replace(/\s+/g, '_')}_Cicangkanghilir.pdf`);
+        }
+
+        // Charts Initialization
+        function initCharts() {
+            // Chart Age (Profil)
+            const ctxAge = document.getElementById('chartAge');
+            if(ctxAge) {
+                if(window.myChartAge) window.myChartAge.destroy();
+                window.myChartAge = new Chart(ctxAge, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Balita (0-5 Thn)', 'Anak & Remaja (6-18 Thn)', 'Usia Produktif (19-55 Thn)', 'Lansia (>55 Thn)'],
+                        datasets: [{
+                            data: [850, 1920, 4310, 1370],
+                            backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Chart Edu (Profil)
+            const ctxEdu = document.getElementById('chartEdu');
+            if(ctxEdu) {
+                if(window.myChartEdu) window.myChartEdu.destroy();
+                window.myChartEdu = new Chart(ctxEdu, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Tidak Sekolah', 'SD / Sederajat', 'SMP / Sederajat', 'SMA / Sederajat', 'Diploma / Sarjana'],
+                        datasets: [{
+                            label: 'Jumlah Warga',
+                            data: [420, 2950, 2410, 2120, 550],
+                            backgroundColor: '#15803d'
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Chart RW Bar (Data RW)
+            const ctxRw = document.getElementById('chartRwBar');
+            if(ctxRw) {
+                if(window.myChartRw) window.myChartRw.destroy();
+                window.myChartRw = new Chart(ctxRw, {
+                    type: 'bar',
+                    data: {
+                        labels: appData.rwData.map(d => d.rw),
+                        datasets: [{
+                            label: 'Total Warga per RW',
+                            data: appData.rwData.map(d => d.warga),
+                            backgroundColor: '#16a34a'
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        }
+
+        // Initial Load
+        window.onload = function() {
+            renderAuthUI();
+            renderBeranda();
+            renderKependudukanTables();
+            renderLingkungan();
+            renderRwTable();
+            initCharts();
+        };
+    </script>
+</body>
+</html>
